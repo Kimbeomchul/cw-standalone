@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#F5F7FA">
+    <title>돈나무 누르기</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="game-container" id="gameContainer">
+        <!-- 상단 헤더 -->
+        <div class="top-header">
+            <h1 class="game-title">돈나무 누르기</h1>
+            <button class="info-button-main" id="infoButtonMain" title="게임 정보">ℹ️</button>
+        </div>
+
+        <!-- 메인 화면 -->
+        <div class="main-screen">
+            <!-- 금액 표시 영역 (토스 스타일) -->
+            <div class="currency-display">
+                <div class="main-currency">
+                    <span class="currency-icon">🌳</span>
+                    <div class="currency-amount-wrapper">
+                        <span class="currency-amount" id="coins">0원</span>
+                    </div>
+                </div>
+                <div class="income-stats">
+                    <div class="income-item">
+                        <span class="income-label">초당</span>
+                        <span class="income-value" id="perSecond">0원</span>
+                    </div>
+                    <div class="income-item">
+                        <span class="income-label">클릭당</span>
+                        <span class="income-value" id="perClick">1원</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 돈나무 클릭 영역 -->
+            <div class="tree-container" id="clickArea">
+                <img src="images/image.png" alt="돈나무" class="money-tree" id="moneyTree">
+            </div>
+        </div>
+
+        <!-- 부스터 버튼 (왼쪽 하단) -->
+        <button class="booster-button" id="boosterButton">
+            <div class="booster-content">
+                <span class="booster-icon">💊</span>
+                <span class="booster-label">영양제</span>
+                <span class="booster-multiplier">×2</span>
+            </div>
+            <div class="booster-timer" id="boosterTimer"></div>
+            <div class="booster-cooldown" id="boosterCooldown"></div>
+        </button>
+
+        <!-- 상점 버튼 (오른쪽 하단) -->
+        <button class="shop-button" id="shopButton">
+            <span class="shop-icon">🛒</span>
+        </button>
+
+        <!-- 상점 모달 -->
+        <div class="shop-modal" id="shopModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>상점</h2>
+                    <button class="close-button" id="closeShop">✕</button>
+                </div>
+                
+                <!-- 탭 메뉴 -->
+                <div class="shop-tabs">
+                    <button class="shop-tab active" data-tab="items">아이템</button>
+                    <button class="shop-tab" data-tab="customize">커스터마이징</button>
+                </div>
+                
+                <!-- 아이템 탭 -->
+                <div class="shop-tab-content active" id="itemsTab">
+                    <div class="shop-items" id="shopItems">
+                        <!-- 아이템들이 여기에 동적으로 추가됩니다 -->
+                    </div>
+                </div>
+                
+                <!-- 커스터마이징 탭 -->
+                <div class="shop-tab-content" id="customizeTab">
+                    <div class="customize-section">
+                        <h3 class="customize-title">나무 이미지</h3>
+                        <div class="customize-items" id="treeItems">
+                            <!-- 나무 이미지 아이템들이 여기에 추가됩니다 -->
+                        </div>
+                    </div>
+                    <div class="customize-section">
+                        <h3 class="customize-title">클릭 이미지</h3>
+                        <div class="customize-items" id="clickItems">
+                            <!-- 클릭 이미지 아이템들이 여기에 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 정보 모달 -->
+        <div class="info-modal" id="infoModal">
+            <div class="info-modal-content">
+                <div class="info-modal-header">
+                    <h3>게임 정보</h3>
+                    <button class="close-button" id="closeInfo">✕</button>
+                </div>
+                <div class="info-modal-body">
+                    <p>커스터마이징에 존재하는 이미지들은 Nano Banana를 활용하여 만들었습니다.</p>
+                    <p>돈나무 누르기 게임은 현재 Sample 버전입니다</p>
+                    <p style="margin-top: 12px;">문의: 혁신서비스개발팀</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 구매 확인 팝업 -->
+        <div class="purchase-modal" id="purchaseModal">
+            <div class="purchase-modal-content">
+                <div class="purchase-modal-header">
+                    <h3>구매 확인</h3>
+                </div>
+                <div class="purchase-modal-body">
+                    <p id="purchaseMessage"></p>
+                </div>
+                <div class="purchase-modal-footer">
+                    <button class="purchase-button cancel" id="purchaseCancel">취소</button>
+                    <button class="purchase-button confirm" id="purchaseConfirm">구매</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
+

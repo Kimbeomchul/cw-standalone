@@ -16,7 +16,7 @@ let gameState = {
 
 // 부스터 상태
 let boosterMultiplier = 1;
-let isClicking = false; // 중복 클릭 방지
+let activeTouches = new Set(); // 활성 터치 ID 추적 (멀티터치 지원)
 let clickHandlersAttached = false; // 이벤트 리스너 중복 방지
 const BOOSTER_COOLDOWN = 10 * 60 * 1000; // 10분 (밀리초)
 
@@ -257,7 +257,7 @@ function init() {
     }, 100);
 }
 
-// 클릭 영역 설정 (중복 방지 강화)
+// 클릭 영역 설정 (멀티터치 지원)
 function setupClickArea() {
     if (clickHandlersAttached) return; // 이미 등록된 경우 무시
     
@@ -267,9 +267,13 @@ function setupClickArea() {
     // 기존 이벤트 리스너 제거 후 재등록
     clickArea.removeEventListener('click', handleClick);
     clickArea.removeEventListener('touchstart', handleTouch);
+    clickArea.removeEventListener('touchend', handleTouchEnd);
+    clickArea.removeEventListener('touchcancel', handleTouchCancel);
     
     clickArea.addEventListener('click', handleClick, { once: false, passive: false });
     clickArea.addEventListener('touchstart', handleTouch, { once: false, passive: false });
+    clickArea.addEventListener('touchend', handleTouchEnd, { once: false, passive: false });
+    clickArea.addEventListener('touchcancel', handleTouchCancel, { once: false, passive: false });
     
     clickHandlersAttached = true;
 }
@@ -401,17 +405,10 @@ function showPurchaseConfirm(message, callback) {
     }
 }
 
-// 클릭 처리 (중복 방지 강화 + 뽀잉뽀잉 애니메이션)
+// 클릭 처리 (멀티터치 지원)
 function handleClick(e) {
     e.preventDefault();
     e.stopPropagation();
-    e.stopImmediatePropagation();
-    
-    if (isClicking) {
-        return false;
-    }
-    
-    isClicking = true;
     
     // 나무 뽀잉뽀잉 애니메이션
     const clickArea = document.getElementById('clickArea');
@@ -425,50 +422,64 @@ function handleClick(e) {
     addCoins(gameState.perClick);
     showPopAnimation(e);
     
-    setTimeout(() => {
-        isClicking = false;
-    }, 100);
+    return false;
+}
+
+// 터치 처리 (멀티터치 지원 - 여러 손가락 동시 처리)
+function handleTouch(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const clickArea = document.getElementById('clickArea');
+    if (!clickArea) return false;
+    
+    const rect = clickArea.getBoundingClientRect();
+    
+    // 모든 활성 터치 처리 (멀티터치 지원)
+    for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        const touchId = touch.identifier;
+        
+        // 이미 처리 중인 터치는 건너뛰기
+        if (activeTouches.has(touchId)) {
+            continue;
+        }
+        
+        // 터치 ID 추가
+        activeTouches.add(touchId);
+        
+        // 나무 뽀잉뽀잉 애니메이션 (첫 터치에만)
+        if (i === 0) {
+            clickArea.classList.add('clicked');
+            setTimeout(() => {
+                clickArea.classList.remove('clicked');
+            }, 400);
+        }
+        
+        // 코인 추가 및 애니메이션
+        addCoins(gameState.perClick);
+        showPopAnimation({ clientX: touch.clientX, clientY: touch.clientY }, rect);
+    }
     
     return false;
 }
 
-// 터치 처리 (중복 방지 강화 + 뽀잉뽀잉 애니메이션)
-function handleTouch(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-    
-    if (isClicking) {
-        return false;
+// 터치 종료 처리
+function handleTouchEnd(e) {
+    // 종료된 터치 ID 제거
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        activeTouches.delete(touch.identifier);
     }
-    
-    isClicking = true;
-    
-    const touch = e.touches[0];
-    if (!touch) {
-        isClicking = false;
-        return false;
+}
+
+// 터치 취소 처리
+function handleTouchCancel(e) {
+    // 취소된 터치 ID 제거
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        const touch = e.changedTouches[i];
+        activeTouches.delete(touch.identifier);
     }
-    
-    // 나무 뽀잉뽀잉 애니메이션
-    const clickArea = document.getElementById('clickArea');
-    if (clickArea) {
-        clickArea.classList.add('clicked');
-        setTimeout(() => {
-            clickArea.classList.remove('clicked');
-        }, 400);
-    }
-    
-    const rect = e.currentTarget.getBoundingClientRect();
-    
-    addCoins(gameState.perClick);
-    showPopAnimation({ clientX: touch.clientX, clientY: touch.clientY }, rect);
-    
-    setTimeout(() => {
-        isClicking = false;
-    }, 100);
-    
-    return false;
 }
 
 // 코인 추가 (애니메이션 포함)
